@@ -1,13 +1,13 @@
 import gleam/float
-import gleam/format
+import gleam/int
 import gleam/io
 import gleam/string
-import gleam/int
 import input.{input}
 
 pub type Commission {
   Commission(s_price: Float, c_rate: Float, t_rate: Float)
 }
+
 pub fn main() {
   run_app()
 }
@@ -38,7 +38,6 @@ fn run_app() {
     Error(_) -> io.println("Error reading input. Exiting.")
   }
 }
-
 
 fn get_pcode() -> Float {
   case input(prompt: "") {
@@ -150,13 +149,11 @@ fn check_negative(val: Float) -> Float {
   }
 }
 
-
 fn is_letter(char: String) -> Bool {
   let lower = string.lowercase(char)
   let upper = string.uppercase(char)
   lower != upper
 }
-
 
 fn gross_rate(comm: Commission) -> Float {
   case comm.s_price >=. 20_000_000.0 {
@@ -173,12 +170,30 @@ fn net_com(comm: Commission) -> Float {
   gross_rate(comm) -. tax(comm)
 }
 
+fn format_2dp(value: Float) -> String {
+  // 1. Shift decimal 2 places right and round to nearest whole number
+  // e.g., 123.456 -> 12346
+  let scaled_int = float.round(value *. 100.0)
+
+  // 2. Separate the whole number part (dollars)
+  // e.g., 12346 / 100 = 123
+  let whole = scaled_int / 100
+
+  // 3. Separate the fractional part (cents)
+  // e.g., 12346 % 100 = 46
+  let fraction = scaled_int % 100
+
+  // 4. Format string: Ensure fraction is always 2 digits (pad with 0)
+  // e.g., if fraction is 5, make it "05"
+  let fraction_str = string.pad_start(int.to_string(fraction), 2, "0")
+
+  int.to_string(whole) <> "." <> fraction_str
+}
+
 fn display_results(comm: Commission) {
   let gross = gross_rate(comm)
   let net = net_com(comm)
 
-  let assert Ok(gross_str) = format.sprintf("~.2f", [gross])
-  let assert Ok(net_str) = format.sprintf("~.2f", [net])
-  io.println("\nGross Commission: " <> gross_str)
-  io.println("Net Commission: " <> net_str)
+  io.println("\nGross Commission: " <> format_2dp(gross))
+  io.println("Net Commission: " <> format_2dp(net))
 }
