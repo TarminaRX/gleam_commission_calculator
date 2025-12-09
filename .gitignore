@@ -2,8 +2,8 @@
 *.blob
 *.ez
 /build
-/node_runtime
+/node_runtime*
 node-v*
-real_estate_calculator
+real_estate_calculator*
 /node_modules
 erl_crash.dump
